@@ -4,7 +4,36 @@ if (!isset($_SESSION['usuario'])) {
     header("Location: index.html");
     exit();
 }
-$con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
+
+// Conexión a la base de datos
+$con = new mysqli("localhost", "root", "diana76", "almacen", 3307);
+if ($con->connect_error) {
+    die("Conexión fallida: " . $con->connect_error);
+}
+
+// Obtener productos
+$productos_result = $con->query("SELECT * FROM productos");
+
+// Obtener usuarios
+$usuarios_result = $con->query("SELECT * FROM usuarios");
+
+// Obtener ventas
+$ventas_result = $con->query("SELECT v.id, p.nombre AS producto, v.cantidad, v.precio_unitario, v.total, v.fecha_venta FROM ventas v JOIN productos p ON v.id_producto = p.id");
+
+// Para obtener datos para los gráficos
+$productos_data = [];
+$ventas_data = [];
+$ventas_dates = [];
+
+while ($row = $productos_result->fetch_assoc()) {
+    $productos_data[] = $row;
+}
+
+while ($row = $ventas_result->fetch_assoc()) {
+    $ventas_data[] = $row['total'];
+    $ventas_dates[] = $row['fecha_venta'];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -18,6 +47,84 @@ $con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
 
     <!-- Cargar Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+        }
+
+        .table thead {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .table-striped tbody tr:nth-child(odd) {
+            background-color: #f1f1f1;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .btn-custom {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-custom:hover {
+            background-color: #218838;
+        }
+
+        .header-text {
+            color: #007bff;
+        }
+
+        .card {
+            margin-bottom: 30px;
+        }
+
+        .row {
+            margin-top: 30px;
+        }
+
+        .col-md-4 {
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            height: 200px;  /* Cambié la altura aquí */
+            width: 100%;
+        }
+
+        .nav-tabs .nav-link {
+            border-radius: 0;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: #0056b3;
+        }
+
+        .navbar {
+            margin-bottom: 30px;
+        }
+
+        .tab-content {
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .float-end {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
 <div class="container mt-4">
@@ -73,7 +180,7 @@ $con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
                 ?>
                     <div class="col-md-4 mb-4">
                         <h5><?php echo $productoNombre; ?></h5>
-                        <canvas id="pieChart<?php echo $productoId; ?>" width="200" height="200"></canvas>
+                        <canvas id="pieChart<?php echo $productoId; ?>" width="150" height="150"></canvas> <!-- Tamaño ajustado -->
                         <script>
                             // Crear gráfico de pastel para cada producto
                             var ctx = document.getElementById('pieChart<?php echo $productoId; ?>').getContext('2d');
@@ -85,8 +192,8 @@ $con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
                                         label: '<?php echo $productoNombre; ?>',
                                         data: [<?php echo $vendidos; ?>, <?php echo $disponibles; ?>],
                                         backgroundColor: [
-                                            'rgba(255, 99, 132, 0.2)', // Color para "Vendidos"
-                                            'rgba(54, 162, 235, 0.2)'  // Color para "Disponibles"
+                                            'rgba(255, 99, 132, 0.6)', // Color para "Vendidos"
+                                            'rgba(54, 162, 235, 0.6)'  // Color para "Disponibles"
                                         ],
                                         borderColor: [
                                             'rgba(255, 99, 132, 1)',   // Color para "Vendidos"
@@ -100,6 +207,13 @@ $con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
                                     plugins: {
                                         legend: {
                                             position: 'top',
+                                        },
+                                        tooltip: {
+                                            callbacks: {
+                                                label: function(tooltipItem) {
+                                                    return tooltipItem.label + ': ' + tooltipItem.raw;
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -137,4 +251,6 @@ $con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+</html>
+
 </html>
