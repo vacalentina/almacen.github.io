@@ -3,7 +3,7 @@ session_start();
 if (!isset($_SESSION['usuario'])) exit();
 
 // Conexión a la base de datos
-$con = new mysqli("localhost", "root", "diana76", "almacen", 3307);
+$con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
 
 // Verificar si la conexión fue exitosa
 if ($con->connect_error) {

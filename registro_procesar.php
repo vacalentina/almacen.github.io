@@ -5,7 +5,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
-    $con = new mysqli("localhost", "root", "diana76", "almacen", 3307);
+    $con = new mysqli("localhost", "root", "daniela_0312", "almacen", 3306);
     if ($con->connect_error) {
         die("Conexión fallida: " . $con->connect_error);
     }
